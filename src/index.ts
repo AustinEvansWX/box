@@ -1,94 +1,49 @@
+import { BACKGROUND, FRAME_RATE, HEIGHT, WIDTH } from "./config.js";
+import { GetEvents, KeyDown, KeyState, KeyUp } from "./events.js";
 import { GameObject } from "./gameObject.js";
+import { Player } from "./player.js";
 import { Renderer } from "./renderer.js";
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-const WIDTH = 500;
-const HEIGHT = 500;
-const FRAME_RATE = 60;
-const BACKGROUND = "#2e3440";
-
-interface Buttons {
-  [button: string]: boolean;
-}
-
+const GameObjects: GameObject[] = [];
 const renderer = new Renderer(canvas, context);
-const background = new GameObject(0, 0, WIDTH, HEIGHT, BACKGROUND);
-const player = new GameObject(0, 0, 50, 50, "#a3be8c");
-
-const buttons: Buttons = {};
 
 Start();
 
 function Start() {
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
+  const background = new GameObject(0, 0, WIDTH, HEIGHT, BACKGROUND);
+  const player = new Player(0, 0, 50, 50, "#a3be8c");
+
+  GameObjects.push(background);
+  GameObjects.push(player);
+
   setInterval(Update, 1000 / FRAME_RATE);
 }
 
 function Update() {
-  renderer.Draw(background);
-  renderer.Draw(player);
-
-  player.position.x = Clamp(
-    player.position.x + player.xVel,
-    WIDTH - player.size.w,
-    0
-  );
-  player.position.y = Clamp(
-    player.position.y + player.yVel,
-    HEIGHT - player.size.h,
-    0
-  );
-
-  player.isGrounded = player.position.y == HEIGHT - player.size.h;
-  player.yVel += player.isGrounded ? -player.yVel : 1;
-}
-
-function Clamp(num: number, max: number, min: number): number {
-  return Math.min(max, Math.max(min, num));
-}
-
-function KeyDown(event: KeyboardEvent) {
-  const key = event.key.toLowerCase();
-
-  if (buttons[key]) return;
-
-  switch (key) {
-    case " ":
-      if (!player.isGrounded) break;
-      player.yVel -= 20;
-      break;
-
-    case "a":
-      player.xVel -= 5;
-      break;
-
-    case "d":
-      player.xVel += 5;
-      break;
+  for (let object of GameObjects) {
+    object.Update(GetEvents());
   }
 
-  buttons[key] = true;
-}
-
-function KeyUp(event: KeyboardEvent) {
-  const key = event.key.toLowerCase();
-
-  if (!buttons[key]) return;
-
-  switch (key) {
-    case "a":
-      player.xVel -= -5;
-      break;
-
-    case "d":
-      player.xVel -= 5;
-      break;
+  for (let object of GameObjects) {
+    renderer.Draw(object);
   }
 
-  delete buttons[key];
+  const events = GetEvents();
+
+  for (let key in events) {
+    if (events[key] == KeyState.Pressed) {
+      events[key] = KeyState.Repeated;
+    }
+
+    if (events[key] == KeyState.Released) {
+      events[key] = KeyState.None;
+    }
+  }
 }
 
 document.body.addEventListener("keydown", KeyDown);
