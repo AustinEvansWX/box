@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    html {
+      height: 100%;
+    }
+
+    body {
+      height: 100%;
+      margin: 0;
+      background-color: #2e3440;
+      display: grid;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      border-radius: 5px;
+      box-shadow: 0 0 15px -5px black;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas" width="500" height="500"></canvas>
+
+  <script>
+    window.exports = {}
+  </script>
+  <script type="module" src="dist/index.js"></script>
+</body>
+
+</html>
